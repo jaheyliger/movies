@@ -13,15 +13,37 @@ const Login = () => {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 
-		if (email === 'admin@example.com') {
-			setJwtToken('set');
-			setAlertClassName('d-none');
-			setAlertMessage('');
-			navigate('/');
-		} else {
-			setAlertClassName('alert-danger');
-			setAlertMessage('Invalid Credentials');
-		}
+		let payload = {
+			email,
+			password
+		};
+
+		const requestOptions = {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			credentials: 'include',
+			body: JSON.stringify(payload)
+		};
+
+		fetch(`/authenticate`, requestOptions)
+			.then((res) => res.json())
+			.then((data) => {
+				if (data.error) {
+					setAlertClassName('alert-danger');
+					setAlertMessage(data.message);
+				} else {
+					setJwtToken(data.access_token);
+					setAlertClassName('d-none');
+					setAlertMessage('');
+					navigate('/');
+				}
+			})
+			.catch((error) => {
+				setAlertClassName('alert-danger');
+				setAlertMessage(error);
+			});
 	};
 
 	return (
